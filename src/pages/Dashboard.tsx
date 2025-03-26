@@ -1,17 +1,14 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
-import { Upload, LogOut, MessageCircle } from "lucide-react";
-import { auth } from "@/services/FirebaseConfig";
 import { useNavigate } from "react-router-dom";
-import { signOut } from "firebase/auth";
 import { collection, onSnapshot, getFirestore } from "firebase/firestore";
 import { app } from "../services/FirebaseConfig";
-import Header from "@/components/Header"; 
+import Header from "@/components/Header";
+
 
 const Dashboard = () => {
   const [messages, setMessages] = useState([]);
   const [videos, setVideos] = useState([]); // Estado para armazenar os vídeos
+  const [bibliotecas, setBibliotecas] = useState([]); // Estado para armazenar as bibliotecas
   const navigate = useNavigate();
   const firestore = getFirestore(app);
 
@@ -30,27 +27,32 @@ const Dashboard = () => {
       setVideos(videosList);
     });
 
+    // Carregar bibliotecas
+    const bibliotecasCollection = collection(firestore, "bibliotecas");
+    const unsubscribeBibliotecas = onSnapshot(bibliotecasCollection, (snapshot) => {
+      const bibliotecasList = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setBibliotecas(bibliotecasList);
+    });
+
     return () => {
       unsubscribeMessages();
       unsubscribeVideos();
+      unsubscribeBibliotecas();
     };
   }, [firestore]);
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      toast({ title: "Logout realizado", description: "Você foi desconectado com sucesso." });
-      navigate("/auth");
-    } catch (error) {
-      toast({ title: "Erro ao sair", description: "Não foi possível fazer logout.", variant: "destructive" });
-    }
+  const handleLibraryClick = (libraryId) => {
+    navigate(`/biblioteca/${libraryId}`); // Navega para a página da biblioteca escolhida
   };
-  
+
+
 
   return (
+    
     <div className="min-h-screen bg-neutral-50 p-6 animate-fade-in">
+     
       <div className="max-w-6xl mx-auto">
-      <Header handleLogout={handleLogout} />
+        <Header/>
 
         {/* Exibição das Mensagens */}
         <div className="mb-8 mt-12">
@@ -65,8 +67,43 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Exibição dos Vídeos */}
-        <div>
+        
+
+
+        {/* Exibição das Bibliotecas */}
+      <div className="mt-12">
+            <h2 className="text-xl font-semibold mb-2">Bibliotecas</h2>
+            <div className="overflow-x-auto flex space-x-4 py-4">
+              {bibliotecas.length > 0 ? (
+                bibliotecas.map((biblioteca) => {
+                  console.log("Dados da biblioteca:", biblioteca); // Verifica os dados no console
+
+                  return (
+                    <div 
+                      key={biblioteca.id}
+                      onClick={() => handleLibraryClick(biblioteca.id)} 
+                      className="flex-none w-32 h-40 bg-gray-200 rounded-lg overflow-hidden cursor-pointer hover:scale-105 transform transition-all flex flex-col items-center"
+                    >
+                      <img 
+                        src={biblioteca.imageUrl} 
+                        alt={biblioteca.nome || "Imagem da biblioteca"} 
+                        className="w-full h-32 object-cover rounded-t-lg" 
+                      />
+                      <p className="text-center text-sm font-semibold mt-2">
+                        {biblioteca.nome || "Sem nome"}
+                      </p>
+                    </div>
+        );
+      })
+    ) : (
+      <p className="text-gray-600">Nenhuma biblioteca encontrada.</p>
+    )}
+  </div>
+</div>
+
+
+{/* Exibição dos Vídeos */}
+<div>
           <h2 className="text-xl font-semibold mb-2">Vídeos</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {videos.length > 0 ? (
@@ -85,7 +122,6 @@ const Dashboard = () => {
             )}
           </div>
         </div>
-
       </div>
     </div>
   );

@@ -9,7 +9,10 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Mensagem from "./pages/Mensagem";
 import SendVideo from "./pages/Video";
+import Biblioteca from "./pages/Biblioteca";
+import LibraryPage from "./pages/LibraryPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+
 
 const queryClient = new QueryClient();
 
@@ -20,9 +23,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/auth" replace />} />
+          <Route path="/" element={<Navigate to="/auth" replace /> } />
           <Route path="/auth" element={<Auth />} />
           <Route path="/video" element={<ProtectedRoute><SendVideo/> </ProtectedRoute>} />
+          <Route path="biblioteca/:bibliotecaId" element={<LibraryPage/>} />
+          <Route path="biblioteca" element={<ProtectedRoute><Biblioteca/></ProtectedRoute>}/>
           <Route path="/mensagem" element={<ProtectedRoute><Mensagem/></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>}/>
           <Route path="*" element={<NotFound />} />
