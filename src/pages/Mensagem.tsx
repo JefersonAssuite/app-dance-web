@@ -70,7 +70,7 @@ const MessageScreen = () => {
 
   return (
     <div className="min-h-screen bg-neutral-50 p-6 flex justify-center items-center">
-      <Header handleLogout={handleLogout} />
+      <Header/>
       <div className="max-w-lg w-full bg-white p-6 rounded-lg shadow-lg">
         <h1 className="text-2xl font-semibold text-neutral-800 mb-4">Enviar Mensagem</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
